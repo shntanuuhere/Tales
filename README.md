@@ -21,7 +21,7 @@ Tales is a Flutter-based notes taking application with a clean and intuitive int
 ### Setup
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/tales.git
+   git clone https://github.com/shntanuuhere/tales.git
    cd tales
    ```
 
