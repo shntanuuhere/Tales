@@ -1,0 +1,46 @@
+name: tales
+description: A simple and elegant notes taking app.
+publish_to: 'none'
+
+version: 1.0.1+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  provider: ^6.1.1
+  shared_preferences: ^2.5.3
+  path_provider: ^2.1.2
+  flutter_svg: ^2.0.7
+  flutter_animate: ^4.5.0
+  url_launcher: ^6.2.4
+  local_auth: ^2.1.8
+  http: ^1.1.0
+  # flutter_web_auth_2 dependency removed due to compilation errors
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  google_sign_in: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.13.1
+  
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/logo/tales.png
+    - assets/icons/
+    - assets/images/
+     
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo/tales.png"
+ 
