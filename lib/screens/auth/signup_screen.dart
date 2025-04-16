@@ -248,8 +248,8 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(iconPath, height: 24, width: 24),
-          const SizedBox(width: 8),
+          Image.asset(iconPath, height: 28, width: 28),
+          const SizedBox(width: 14),
           Text(
             label,
             style: TextStyle(color: Colors.green.shade900),
