@@ -16,6 +16,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tales/services/firestore_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -273,6 +274,18 @@ class _SignupScreenState extends State<SignupScreen> {
 
       // Update user profile with username
       await userCredential.user?.updateDisplayName(_usernameController.text.trim());
+
+      // Save user details to Firestore
+      try {
+        final firestoreService = FirestoreService();
+        await firestoreService.saveUserDetails(
+          userCredential.user!.uid,
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+        );
+      } catch (e) {
+        // Optionally handle Firestore save error
+      }
 
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {

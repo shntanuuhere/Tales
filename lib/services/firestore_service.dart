@@ -133,4 +133,15 @@ class FirestoreService {
     // Commit the batch
     await batch.commit();
   }
+
+  // Save user details to Firestore
+  // When retrieving user details from Firestore, always use Map<String, dynamic> for parsing.
+  // Do not cast Firestore documents directly to custom types or List<Object?>; use explicit deserialization.
+  Future<void> saveUserDetails(String uid, String username, String email) async {
+    await _firestore.collection('users').doc(uid).set({
+      'username': username,
+      'email': email,
+      'createdAt': DateTime.now().toIso8601String(),
+    }, SetOptions(merge: true));
+  }
 }
