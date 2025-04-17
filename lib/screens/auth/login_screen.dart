@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tales/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -325,6 +327,58 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text(e.toString())),
       );
     }
+  }
+
+  Future<void> _checkShowBiometricPrompt() async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    final bool? seenBiometricPrompt = prefs.getBool('seen_biometric_prompt');
+    final bool biometricEnabled = prefs.getBool('biometric_enabled') ?? false;
+    if (user != null && seenBiometricPrompt != true && !biometricEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showBiometricPromptDialog();
+      });
+    }
+  }
+
+  void _showBiometricPromptDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Enable Biometrics?'),
+        content: const Text('Enable biometrics for smooth login. If not, you have to manually login each time you launch the app.'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final authService = AuthService();
+              final available = await authService.isBiometricAvailable();
+              if (available) {
+                final registered = await authService.authenticate();
+                if (registered) {
+                  await authService.setBiometricEnabled(true);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('seen_biometric_prompt', true);
+                  Navigator.of(context).pop();
+                  setState(() {});
+                  return;
+                }
+              }
+              Navigator.of(context).pop();
+            },
+            child: const Text('Enable Now'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('seen_biometric_prompt', true);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Skip for Now'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleGuestLogin() async {

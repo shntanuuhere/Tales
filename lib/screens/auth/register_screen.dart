@@ -19,6 +19,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tales/services/firestore_service.dart';
 import 'package:tales/screens/auth/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tales/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -45,6 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -277,22 +280,71 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  Future<void> _checkShowBiometricPrompt() async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    final bool? seenBiometricPrompt = prefs.getBool('seen_biometric_prompt');
+    final bool biometricEnabled = prefs.getBool('biometric_enabled') ?? false;
+    if (user != null && seenBiometricPrompt != true && !biometricEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showBiometricPromptDialog();
+      });
+    }
+  }
+
+  void _showBiometricPromptDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Enable Biometrics?'),
+        content: const Text('Enable biometrics for smooth login. If not, you have to manually login each time you launch the app.'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final authService = AuthService();
+              final available = await authService.isBiometricAvailable();
+              if (available) {
+                final registered = await authService.authenticate();
+                if (registered) {
+                  await authService.setBiometricEnabled(true);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('seen_biometric_prompt', true);
+                  Navigator.of(context).pop();
+                  setState(() {});
+                  return;
+                }
+              }
+              Navigator.of(context).pop();
+            },
+            child: const Text('Enable Now'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('seen_biometric_prompt', true);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Skip for Now'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
-      // Create user with email and password
       final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // Update user profile with username
       await userCredential.user?.updateDisplayName(_usernameController.text.trim());
 
-      // Save user details to Firestore
       try {
         final firestoreService = FirestoreService();
         await firestoreService.saveUserDetails(
@@ -304,32 +356,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // Ignore Firestore errors for now
       }
 
-      // Send email verification
       if (userCredential.user != null && !userCredential.user!.emailVerified) {
         await userCredential.user!.sendEmailVerification();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('A verification email has been sent. Please check your inbox.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('A verification email has been sent. Please check your inbox.')),
+          );
+        }
       }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-      Navigator.pushReplacementNamed(context, '/home');
+      await _checkShowBiometricPrompt();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleGoogleSignup() async {
+    setState(() => _isLoading = true);
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -338,11 +399,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
-      Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -356,12 +423,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phoneNumber: _phoneController.text,
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance.signInWithCredential(credential);
-          Navigator.pushReplacementNamed(context, '/home');
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
         },
         verificationFailed: (FirebaseAuthException e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.message ?? 'Verification failed')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.message ?? 'Verification failed')),
+            );
+          }
         },
         codeSent: (String verificationId, int? resendToken) {
           setState(() {
@@ -377,10 +448,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
       );
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 
@@ -388,13 +461,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
     try {
       await FirebaseAuth.instance.signInAnonymously();
-      Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }

@@ -16,6 +16,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:tales/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,12 +48,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     Timer(const Duration(seconds: 3), () async {
       if (!mounted) return;
-      // Check if user is already authenticated
+      final prefs = await SharedPreferences.getInstance();
       final user = await FirebaseAuth.instance.authStateChanges().first;
-      if (user != null) {
-        Navigator.pushReplacementNamed(context, '/login');
+      final bool? seenWelcome = prefs.getBool('seen_welcome');
+      final bool biometricEnabled = prefs.getBool('biometric_enabled') ?? false;
+      if (user == null) {
+        // First time user
+        if (seenWelcome != true) {
+          Navigator.pushReplacementNamed(context, '/welcome');
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       } else {
-        Navigator.pushReplacementNamed(context, '/welcome');
+        if (biometricEnabled) {
+          final authService = AuthService();
+          final authenticated = await authService.authenticate();
+          if (authenticated) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else {
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     });
   }

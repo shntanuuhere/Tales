@@ -15,6 +15,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tales/services/auth_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -28,24 +31,43 @@ class _SettingsPageState extends State<SettingsPage> {
   String _userEmail = '';
   String _loginMethod = '';
   String _profilePhoto = '';
+  bool _biometricEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadBiometricPref();
+  }
+
+  Future<void> _loadBiometricPref() async {
+    final authService = AuthService();
+    final enabled = await authService.isBiometricEnabled();
+    setState(() => _biometricEnabled = enabled);
   }
 
   Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final data = doc.data() ?? {};
     setState(() {
-      _userName = prefs.getString('userName') ?? 'User';
-      _userEmail = prefs.getString('userEmail') ?? '';
-      _loginMethod = prefs.getString('loginMethod') ?? '';
-      _profilePhoto = prefs.getString('userPhoto') ?? '';
+      _userName = data['username'] ?? (user.isAnonymous ? 'Guest User' : user.displayName ?? 'User');
+      _userEmail = user.isAnonymous
+        ? 'Guest User'
+        : (user.providerData.isNotEmpty && user.providerData[0].providerId == 'phone')
+          ? user.phoneNumber ?? ''
+          : user.email ?? '';
+      _loginMethod = user.isAnonymous
+        ? 'guest'
+        : (user.providerData.isNotEmpty ? user.providerData[0].providerId : 'email');
+      _profilePhoto = data['photoUrl'] ?? user.photoURL ?? '';
     });
   }
 
   Future<void> _editProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
     final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (context) => _EditProfileDialog(
@@ -53,11 +75,18 @@ class _SettingsPageState extends State<SettingsPage> {
         initialEmail: _userEmail,
       ),
     );
-
     if (result != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userName', result['name']!);
-      await prefs.setString('userEmail', result['email']!);
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'username': result['name'],
+        'email': result['email'],
+        'photoUrl': _profilePhoto,
+      }, SetOptions(merge: true));
+      if (!user.isAnonymous) {
+        await user.updateDisplayName(result['name']);
+        if (_loginMethod == 'email') {
+          await user.updateEmail(result['email']!);
+        }
+      }
       _loadUserData();
     }
   }
@@ -111,14 +140,13 @@ class _SettingsPageState extends State<SettingsPage> {
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: () {
-        // Handle navigation based on the tile title
+      onTap: () async {
         switch (title) {
           case 'Connected Apps':
             _showFeatureDialog('Connected Apps');
             break;
           case 'Account':
-            _showFeatureDialog('Account Settings');
+            await _editProfile();
             break;
           case 'Privacy':
             Navigator.pushNamed(context, '/privacy');
@@ -179,6 +207,17 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           _buildProfileSection(),
           const Divider(),
+          SwitchListTile(
+            title: const Text('Biometric Authentication'),
+            subtitle: const Text('Enable or disable biometric login'),
+            value: _biometricEnabled,
+            onChanged: (value) async {
+              setState(() => _biometricEnabled = value);
+              final authService = AuthService();
+              await authService.setBiometricEnabled(value);
+            },
+            secondary: const Icon(Icons.fingerprint, color: Colors.redAccent),
+          ),
           _buildSettingsTile(
             'Connected Apps',
             'Signed in with ${_loginMethod.isNotEmpty ? _loginMethod[0].toUpperCase() + _loginMethod.substring(1) : "Email"}',
