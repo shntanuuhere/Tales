@@ -15,6 +15,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,9 +43,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.repeat();
 
-    Timer(const Duration(seconds: 3), () {
-      if (mounted) {
+    Timer(const Duration(seconds: 3), () async {
+      if (!mounted) return;
+      // Check if user is already authenticated
+      final user = await FirebaseAuth.instance.authStateChanges().first;
+      if (user != null) {
         Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        Navigator.pushReplacementNamed(context, '/welcome');
       }
     });
   }

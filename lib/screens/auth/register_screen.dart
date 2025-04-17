@@ -12,37 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tales/services/firestore_service.dart';
+import 'package:tales/screens/auth/login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
-  String? _verificationId;
-  bool _isPasswordVisible = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+  bool _isPhoneSignup = false;
+  String? _verificationId;
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
-
-  @override
-  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -68,25 +73,47 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
+                    controller: _usernameController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                      ),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your username';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
                     controller: _emailController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: const TextStyle(color: Colors.white70),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white24),
-                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.white24),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white),
-                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.green),
                       ),
-                      filled: true,
-                      fillColor: Colors.white10,
+                      border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Please enter a valid email';
                       }
                       return null;
                     },
@@ -94,125 +121,127 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
+                    obscureText: _obscurePassword,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: const TextStyle(color: Colors.white70),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white24),
-                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.white24),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white),
-                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.green),
                       ),
-                      filled: true,
-                      fillColor: Colors.white10,
+                      border: OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
                           color: Colors.white54,
                         ),
                         onPressed: () {
                           setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
+                            _obscurePassword = !_obscurePassword;
                           });
                         },
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return 'Please enter a password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                      ),
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white54,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm your password';
+                      }
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
                     child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleSignup,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: _isLoading ? null : _handleLogin,
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Sign In'),
+                          : const Text('Sign Up', style: TextStyle(fontSize: 18)),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   const Text(
                     'OR',
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: Colors.white54, fontSize: 16),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        onPressed: _isLoading ? null : _handleGoogleLogin,
+                        onPressed: _isLoading ? null : _handleGoogleSignup,
                         icon: SvgPicture.asset('assets/images/google_logo.svg', height: 32, width: 32),
-                        tooltip: 'Login with Google',
+                        tooltip: 'Sign up with Google',
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 24),
                       IconButton(
-                        onPressed: _isLoading ? null : _handlePhoneLogin,
+                        onPressed: _isLoading ? null : _handlePhoneSignup,
                         icon: SvgPicture.asset('assets/images/phone_logo.svg', height: 32, width: 32),
-                        tooltip: 'Login with Phone',
-                      ),
-                      const SizedBox(width: 16),
-                      IconButton(
-                        onPressed: _isLoading ? null : _handleGuestLogin,
-                        icon: SvgPicture.asset('assets/images/guest_logo.svg', height: 32, width: 32),
-                        tooltip: 'Login as Guest',
+                        tooltip: 'Sign up with Phone',
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
                     },
                     child: const Text(
-                      "Don't have an account? Sign Up",
+                      "Already have an account? Sign in",
                       style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () async {
-                      if (_emailController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please enter your email to reset password.')),
-                        );
-                        return;
-                      }
-                      setState(() => _isLoading = true);
-                      try {
-                        await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text.trim());
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Password reset email sent. Please check your inbox.')),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
-                      } finally {
-                        setState(() => _isLoading = false);
-                      }
-                    },
-                    child: const Text(
-                      'Forgot your password?',
-                      style: TextStyle(color: Colors.white54),
                     ),
                   ),
                 ],
@@ -224,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _socialLoginButton(String iconPath, String label, VoidCallback onPressed) {
+  Widget _socialSignupButton(String iconPath, String label, VoidCallback onPressed) {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
@@ -237,8 +266,8 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(iconPath, height: 24, width: 24),
-          const SizedBox(width: 8),
+          Image.asset(iconPath, height: 28, width: 28),
+          const SizedBox(width: 14),
           Text(
             label,
             style: TextStyle(color: Colors.green.shade900),
@@ -248,16 +277,44 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
-      // Implement Firebase email/password login here
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Create user with email and password
+      final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+      );
+
+      // Update user profile with username
+      await userCredential.user?.updateDisplayName(_usernameController.text.trim());
+
+      // Save user details to Firestore
+      try {
+        final firestoreService = FirestoreService();
+        await firestoreService.saveUserDetails(
+          userCredential.user!.uid,
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+        );
+      } catch (e) {
+        // Ignore Firestore errors for now
+      }
+
+      // Send email verification
+      if (userCredential.user != null && !userCredential.user!.emailVerified) {
+        await userCredential.user!.sendEmailVerification();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A verification email has been sent. Please check your inbox.')),
+        );
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
@@ -269,7 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleGoogleLogin() async {
+  Future<void> _handleGoogleSignup() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
@@ -289,7 +346,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handlePhoneLogin() async {
+  Future<void> _handlePhoneSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -327,7 +384,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleGuestLogin() async {
+  Future<void> _handleGuestSignup() async {
     setState(() => _isLoading = true);
     try {
       await FirebaseAuth.instance.signInAnonymously();
