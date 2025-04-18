@@ -51,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       final prefs = await SharedPreferences.getInstance();
       final user = await FirebaseAuth.instance.authStateChanges().first;
       final bool? seenWelcome = prefs.getBool('seen_welcome');
-      final bool biometricEnabled = prefs.getBool('biometric_enabled') ?? false;
       if (user == null) {
         // First time user
         if (seenWelcome != true) {
@@ -60,17 +59,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           Navigator.pushReplacementNamed(context, '/login');
         }
       } else {
-        if (biometricEnabled) {
-          final authService = AuthService();
-          final authenticated = await authService.authenticate();
-          if (authenticated) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else {
-            Navigator.pushReplacementNamed(context, '/login');
-          }
-        } else {
-          Navigator.pushReplacementNamed(context, '/login');
-        }
+        Navigator.pushReplacementNamed(context, '/home');
       }
     });
   }

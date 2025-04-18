@@ -22,6 +22,7 @@ import 'package:tales/screens/auth/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tales/services/auth_service.dart';
 
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -57,47 +58,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 60),
-                  const Text(
-                    'Welcome to Tales',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _usernameController,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: 16,
+              left: 8,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.maybePop(context);
+                },
+              ),
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 60),
+                      const Text(
+                        'Welcome to Tales',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      TextFormField(
+                        controller: _usernameController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Username',
                       labelStyle: const TextStyle(color: Colors.white70),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white24),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your username';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
+                      filled: true,
+                      fillColor: Colors.white10,
+                      suffixIcon: const Icon(Icons.person_outline, color: Colors.white54),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your username';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
                     controller: _emailController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
@@ -105,24 +122,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelStyle: const TextStyle(color: Colors.white70),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white24),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
+                      filled: true,
+                      fillColor: Colors.white10,
+                      suffixIcon: const Icon(Icons.email_outlined, color: Colors.white54),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     style: const TextStyle(color: Colors.white),
@@ -131,11 +152,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelStyle: const TextStyle(color: Colors.white70),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white24),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white10,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -147,19 +171,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           });
                         },
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     style: const TextStyle(color: Colors.white),
@@ -168,11 +192,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelStyle: const TextStyle(color: Colors.white70),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white24),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white10,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
@@ -184,99 +211,81 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           });
                         },
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleSignup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: _isLoading ? null : _handleSignup,
+                          child: _isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text('SIGN UP'),
                         ),
                       ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Sign Up', style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _socialSignupButton('assets/images/google_logo.svg', '', _handleGoogleSignup),
+                        const SizedBox(width: 12),
+                        _socialSignupButton('assets/images/phone_logo.svg', '', _handlePhoneSignup),
+                        const SizedBox(width: 12),
+                        _socialSignupButton('assets/images/guest_logo.svg', '', _handleGuestSignup),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'OR',
-                    style: TextStyle(color: Colors.white54, fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: _isLoading ? null : _handleGoogleSignup,
-                        icon: SvgPicture.asset('assets/images/google_logo.svg', height: 32, width: 32),
-                        tooltip: 'Sign up with Google',
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      },
+                      child: const Text(
+                        'Already have an account? Login',
+                        style: TextStyle(color: Colors.blue),
                       ),
-                      const SizedBox(width: 24),
-                      IconButton(
-                        onPressed: _isLoading ? null : _handlePhoneSignup,
-                        icon: SvgPicture.asset('assets/images/phone_logo.svg', height: 32, width: 32),
-                        tooltip: 'Sign up with Phone',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      );
-                    },
-                    child: const Text(
-                      "Already have an account? Sign in",
-                      style: TextStyle(color: Colors.green),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
+
   Widget _socialSignupButton(String iconPath, String label, VoidCallback onPressed) {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: Colors.green.shade900),
+        side: BorderSide(color: Colors.blue.shade900),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(iconPath, height: 28, width: 28),
-          const SizedBox(width: 14),
-          Text(
-            label,
-            style: TextStyle(color: Colors.green.shade900),
-          ),
-        ],
-      ),
+      child: Image.asset(iconPath, height: 28, width: 28),
     );
   }
 
@@ -366,11 +375,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
 
       await _checkShowBiometricPrompt();
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
+      final authService = AuthService();
+      final available = await authService.isBiometricAvailable();
+      if (available) {
+        final registered = await authService.authenticate();
+        if (registered) {
+          await authService.setBiometricEnabled(true);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('seen_biometric_prompt', true);
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+            );
+          }
+          return;
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -399,8 +431,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+      final authService = AuthService();
+      final available = await authService.isBiometricAvailable();
+      if (available) {
+        final registered = await authService.authenticate();
+        if (registered) {
+          await authService.setBiometricEnabled(true);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('seen_biometric_prompt', true);
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+          return;
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -423,8 +478,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phoneNumber: _phoneController.text,
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance.signInWithCredential(credential);
-          if (mounted) {
-            Navigator.pushReplacementNamed(context, '/home');
+          final authService = AuthService();
+          final available = await authService.isBiometricAvailable();
+          if (available) {
+            final registered = await authService.authenticate();
+            if (registered) {
+              await authService.setBiometricEnabled(true);
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('seen_biometric_prompt', true);
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              }
+              return;
+            } else {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+                );
+              }
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+              );
+            }
           }
         },
         verificationFailed: (FirebaseAuthException e) {
@@ -461,8 +539,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
     try {
       await FirebaseAuth.instance.signInAnonymously();
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+      final authService = AuthService();
+      final available = await authService.isBiometricAvailable();
+      if (available) {
+        final registered = await authService.authenticate();
+        if (registered) {
+          await authService.setBiometricEnabled(true);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('seen_biometric_prompt', true);
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+          return;
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Biometric authentication is required to use the app.')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

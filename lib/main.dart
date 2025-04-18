@@ -1,20 +1,8 @@
-// Copyright 2025 Shantanu Sen Gupta
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_notifier.dart';
 import 'screens/splash_screen.dart';
@@ -25,45 +13,44 @@ import 'screens/about_us.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/welcome_screen.dart';
+import 'screens/user_details_screen.dart';
 import 'providers/notes_provider.dart';
 
-void main()async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeNotifier()),
-        ChangeNotifierProvider(create: (_) => NotesProvider()..initialize()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedIn = FirebaseAuth.instance.currentUser != null;
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  const MyApp({Key? key, required this.isLoggedIn}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final themeNotifier = Provider.of<ThemeNotifier>(context);
-
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Tales',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: themeNotifier.themeMode,
+      themeMode: ThemeMode.dark,
+      debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => const SplashScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const RegisterScreen(),
-        '/privacy': (context) => const PrivacyPolicy(),
-        '/terms': (context) => const TermsAndConditions(),
-        '/about': (context) => const AboutUs(),
-        '/welcome': (context) => const WelcomeScreen(),
+        '/': (context) => SplashScreen(),
+        '/welcome': (context) => WelcomeScreen(),
+        '/login': (context) => LoginScreen(),
+        '/register': (context) => RegisterScreen(),
+        '/user_details': (context) => UserDetailsScreen(),
+        '/home': (context) => HomeScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (isLoggedIn) {
+          return MaterialPageRoute(builder: (_) => UserDetailsScreen());
+        } else {
+          return MaterialPageRoute(builder: (_) => SplashScreen());
+        }
       },
     );
   }
