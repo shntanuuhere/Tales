@@ -73,3 +73,5 @@ coverage/
 **/fastlane/test_output
 
 sentry.properties
+
+sentry.properties
