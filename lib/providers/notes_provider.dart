@@ -43,7 +43,7 @@ class NotesProvider extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     await loadNotes();
     _initialized = true;
-    
+
     // If user is already authenticated, subscribe to Firestore
     if (_firestoreService.isAuthenticated) {
       _subscribeToFirestore();
@@ -61,10 +61,11 @@ class NotesProvider extends ChangeNotifier {
   }
 
   Future<void> _saveNotes() async {
-    final String encoded = jsonEncode(_notes.map((note) => note.toJson()).toList());
+    final String encoded =
+        jsonEncode(_notes.map((note) => note.toJson()).toList());
     await _prefs.setString(_storageKey, encoded);
   }
-  
+
   void _handleAuthStateChanged(User? user) async {
     if (user != null) {
       // User logged in, sync local notes to Firestore
@@ -77,7 +78,7 @@ class NotesProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   Future<void> _syncToFirestore() async {
     try {
       if (_firestoreService.isAuthenticated && _notes.isNotEmpty) {
@@ -86,15 +87,15 @@ class NotesProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error syncing to Firestore: $e');
+      // Handle error syncing to Firestore
     }
   }
-  
+
   void _subscribeToFirestore() {
     if (!_firestoreService.isAuthenticated) return;
-    
+
     _unsubscribeFromFirestore(); // Cancel any existing subscription
-    
+
     _notesSubscription = _firestoreService.getNotes().listen((cloudNotes) {
       // Only update if we have cloud notes and they're different from local
       if (cloudNotes.isNotEmpty) {
@@ -104,10 +105,10 @@ class NotesProvider extends ChangeNotifier {
         notifyListeners();
       }
     }, onError: (error) {
-      debugPrint('Error getting notes from Firestore: $error');
+      // Handle error getting notes from Firestore
     });
   }
-  
+
   void _unsubscribeFromFirestore() {
     _notesSubscription?.cancel();
     _notesSubscription = null;
@@ -116,17 +117,17 @@ class NotesProvider extends ChangeNotifier {
   Future<void> addNote(String title, String content) async {
     final now = DateTime.now();
     String noteId = now.millisecondsSinceEpoch.toString();
-    
+
     // If user is authenticated, save to Firestore first
     if (_firestoreService.isAuthenticated) {
       try {
         noteId = await _firestoreService.addNote(title, content);
       } catch (e) {
-        debugPrint('Error adding note to Firestore: $e');
+        // Handle error adding note to Firestore
         // Continue with local storage even if Firestore fails
       }
     }
-    
+
     final note = Note(
       id: noteId,
       title: title,
@@ -148,17 +149,17 @@ class NotesProvider extends ChangeNotifier {
         content: content,
       );
       await _saveNotes();
-      
+
       // If user is authenticated, update in Firestore
       if (_firestoreService.isAuthenticated) {
         try {
           await _firestoreService.updateNote(id, title, content);
         } catch (e) {
-          debugPrint('Error updating note in Firestore: $e');
+          // Handle error updating note in Firestore
           // Continue even if Firestore update fails
         }
       }
-      
+
       notifyListeners();
     }
   }
@@ -166,20 +167,20 @@ class NotesProvider extends ChangeNotifier {
   Future<void> deleteNote(String id) async {
     _notes.removeWhere((note) => note.id == id);
     await _saveNotes();
-    
+
     // If user is authenticated, delete from Firestore
     if (_firestoreService.isAuthenticated) {
       try {
         await _firestoreService.deleteNote(id);
       } catch (e) {
-        debugPrint('Error deleting note from Firestore: $e');
+        // Handle error deleting note from Firestore
         // Continue even if Firestore delete fails
       }
     }
-    
+
     notifyListeners();
   }
-  
+
   @override
   void dispose() {
     _unsubscribeFromFirestore();

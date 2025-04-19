@@ -22,7 +22,7 @@ class WelcomeScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 40),
                     Image.asset(
-                      'assets/logo/zerodha_kite_logo.png',
+                      'assets/logo/wobg.png',
                       height: 64,
                     ),
                     const SizedBox(height: 40),
@@ -38,33 +38,53 @@ class WelcomeScreen extends StatelessWidget {
                     const SizedBox(height: 40),
                     SizedBox(
                       width: double.infinity,
-                      // Demo button removed
-                    ),
-                    const SizedBox(height: 40),
-                    Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: Colors.white24),
-                          bottom: BorderSide(color: Colors.white24),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                                builder: (context) => const RegisterScreen()),
+                          );
+                        },
+                        child: const Text(
+                          'Register to Tales',
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: const Text('Register to Tales', style: TextStyle(color: Colors.white)),
-                            trailing: const Icon(Icons.person_outline, color: Colors.white),
-                            onTap: () {
-                              Navigator.pushNamed(context, '/signup');
-                            },
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white24),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          ListTile(
-                            title: const Text('Login to Tales', style: TextStyle(color: Colors.white)),
-                            trailing: const Icon(Icons.login, color: Colors.white),
-                            onTap: () {
-                              Navigator.pushNamed(context, '/login');
-                            },
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
+                          );
+                        },
+                        child: const Text(
+                          'Login to Tales',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -81,7 +101,8 @@ class WelcomeScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           'Copyright © 2025 hereco. All Rights Reserved',
-                          style: const TextStyle(color: Colors.white38, fontSize: 12),
+                          style: const TextStyle(
+                              color: Colors.white38, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
                       ],

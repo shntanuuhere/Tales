@@ -97,7 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           filled: true,
                           fillColor: Colors.white10,
-                          suffixIcon: const Icon(Icons.person_outline, color: Colors.white54),
+                          suffixIcon: const Icon(Icons.person_outline,
+                              color: Colors.white54),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -126,7 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           fillColor: Colors.white10,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                               color: Colors.white54,
                             ),
                             onPressed: () {
@@ -160,7 +163,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           onPressed: _isLoading ? null : _handleLogin,
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
                               : const Text('LOGIN'),
                         ),
                       ),
@@ -168,19 +172,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _socialLoginButton('assets/images/google_logo.svg', '', _handleGoogleLogin),
+                          _socialLoginButton('assets/images/google_logo.svg',
+                              '', _handleGoogleLogin),
                           const SizedBox(width: 12),
-                          _socialLoginButton('assets/images/phone_logo.svg', '', _handlePhoneLogin),
+                          _socialLoginButton('assets/images/phone_logo.svg', '',
+                              _handlePhoneLogin),
                         ],
                       ),
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/signup');
+                          Navigator.pushNamed(context, '/signup');
                         },
                         child: const Text(
-                          'Don\'t have an account? Sign Up',
-                          style: TextStyle(color: Colors.blue),
+                          "Don't have an account? Sign Up",
+                          style: TextStyle(color: Colors.white70),
                         ),
                       ),
                     ],
@@ -194,7 +200,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _socialLoginButton(String iconPath, String label, VoidCallback onPressed) {
+  Widget _socialLoginButton(
+      String iconPath, String label, VoidCallback onPressed) {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
@@ -234,7 +241,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -305,7 +313,8 @@ class _LoginScreenState extends State<LoginScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Enable Biometrics?'),
-        content: const Text('Enable biometrics for smooth login. If not, you have to manually login each time you launch the app.'),
+        content: const Text(
+            'Enable biometrics for smooth login. If not, you have to manually login each time you launch the app.'),
         actions: [
           TextButton(
             onPressed: () async {

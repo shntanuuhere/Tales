@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
-import 'settings_page.dart';
+import 'settings_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _tabs = [
     const HomeScreen(),
-    const SettingsPage(),
+    const SettingsScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -48,7 +47,8 @@ class _HomePageState extends State<HomePage> {
           decoration: isSelected
               ? BoxDecoration(
                   border: Border(
-                    top: BorderSide(width: 3, color: theme.colorScheme.secondary),
+                    top: BorderSide(
+                        width: 3, color: theme.colorScheme.secondary),
                   ),
                 )
               : null,
