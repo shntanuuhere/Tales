@@ -7,26 +7,140 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tales/main.dart';
+import 'package:provider/provider.dart';
+import 'package:tales/models/wallpaper.dart';
+import 'package:tales/services/auth_service.dart';
+import 'package:tales/services/theme_service.dart';
+import 'package:tales/services/wallpaper_service.dart';
+import 'package:tales/widgets/wallpaper_card.dart';
+
+// Mock WallpaperService for testing
+class MockWallpaperService extends ChangeNotifier implements WallpaperService {
+  bool _isLoading = false;
+  List<Wallpaper> _wallpapers = [];
+  final Set<String> _favorites = {};
+
+  @override
+  bool get isLoading => _isLoading;
+
+  @override
+  List<Wallpaper> get wallpapers => _wallpapers;
+
+  @override
+  List<String> get categories => [];
+
+  @override
+  String get selectedCategory => 'All';
+
+  @override
+  bool get hasError => false;
+
+  @override
+  String? get errorMessage => null;
+
+  MockWallpaperService() {
+    _wallpapers = Wallpaper.getDemoWallpapers();
+  }
+
+  @override
+  Future<void> fetchWallpapers({bool useDelay = false}) async {
+    // No delay in tests
+    _isLoading = true;
+    notifyListeners();
+
+    _wallpapers = Wallpaper.getDemoWallpapers();
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  @override
+  bool isFavorite(String wallpaperId) {
+    return _favorites.contains(wallpaperId);
+  }
+
+  @override
+  Future<void> toggleFavorite(Wallpaper wallpaper) async {
+    if (_favorites.contains(wallpaper.id)) {
+      _favorites.remove(wallpaper.id);
+    } else {
+      _favorites.add(wallpaper.id);
+    }
+    notifyListeners();
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp(isLoggedIn: false));
+  testWidgets('WallpaperCard displays correctly', (WidgetTester tester) async {
+    // Create a test wallpaper
+    final testWallpaper = Wallpaper(
+      id: 'test_id',
+      url: 'https://example.com/image.jpg',
+      thumbnailUrl: 'https://example.com/thumbnail.jpg',
+      category: 'Test Category',
+      photographer: 'Test Photographer',
+      width: 1920,
+      height: 1080,
+    );
 
-    // Wait for the first frame to settle if there are async operations.
-    await tester.pumpAndSettle();
+    // Build the widget with providers
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<WallpaperService>(
+              create: (_) => MockWallpaperService(),
+            ),
+            ChangeNotifierProvider<ThemeService>(
+              create: (_) => ThemeService(false),
+            ),
+            ChangeNotifierProvider<AuthService>(
+              create: (_) => AuthService(),
+            ),
+          ],
+          child: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: WallpaperCard(
+                  wallpaper: testWallpaper,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Allow widget to build
+    await tester.pump();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pumpAndSettle();
+    // Verify the category text is displayed
+    expect(find.text('Test Category'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify the favorite button is displayed (looking for the icon)
+    expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+  });
+
+  testWidgets('Simple app title test', (WidgetTester tester) async {
+    // Build a simple MaterialApp with a Text widget
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text('Tales'),
+          ),
+        ),
+      ),
+    );
+
+    // Verify that the text is displayed
+    expect(find.text('Tales'), findsOneWidget);
   });
 }

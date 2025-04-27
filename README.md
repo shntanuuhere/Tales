@@ -1,72 +1,99 @@
-# Tales - A Simple and Elegant Notes Taking App
+# Tales - Wallpapers, Podcasts & Notes App
 
-## Overview
-Tales is a Flutter-based notes taking application with a clean and intuitive interface. It allows users to create, edit, and organize notes with a beautiful UI and seamless user experience.
+Tales is a modern, elegantly designed app that combines beautiful wallpapers, podcast listening, and note-taking functionality. It provides a seamless experience for users who want to personalize their devices, enjoy their favorite podcasts, and keep track of important information.
+
+<p align="center">
+  <img src="assets/logo/tales.png" width="120" alt="Tales Logo">
+</p>
 
 ## Features
-- User authentication (Email/Password, Google Sign-in)
-- Create and edit notes
-- Biometric authentication for app access
-- Dark/Light theme support
-- Responsive design for various screen sizes
+
+### Wallpapers
+- Browse high-quality wallpapers
+- Set as home screen or lock screen
+- Download for offline use
+- Save favorites
+- Browse by categories
+- Like wallpapers you enjoy
+
+### Podcast Player
+- Stream podcasts from RSS feeds
+- Background playback support
+- Playback speed control (0.75x, 1.0x, 1.5x, 2.0x)
+- Skip forward/backward
+- Episode progress tracking
+- Mini-player for continuous listening while browsing
+
+### Notes
+- Create, edit, and organize personal notes
+- Rich text formatting
+- Color-coded categories
+- Search functionality
+
+### User Experience
+- Beautiful, minimalist design
+- Dark and light theme support
+- Responsive layout for all devices
+- Custom animations and transitions
+- Offline support
+
+### Security
+- Firebase Authentication
+- Optional biometric authentication
+- Secure cloud data storage
 
 ## Getting Started
 
 ### Prerequisites
-- Flutter SDK (>=3.3.0)
-- Dart SDK (>=3.0.0)
-- Android Studio / VS Code
+- Flutter SDK
+- Android Studio or Xcode
 - Firebase account
 
-### Setup
+### Installation
 1. Clone the repository
-   ```
-   git clone https://github.com/shntanuuhere/tales.git
-   cd tales
+   ```bash
+   git clone https://github.com/hereco/tales.git
    ```
 
 2. Install dependencies
-   ```
+   ```bash
    flutter pub get
    ```
 
-3. Firebase Configuration
-   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Add Android and iOS apps to your Firebase project
-   - Download the configuration files:
-     - For Android: `google-services.json` (place in `android/app/`)
-     - For iOS: `GoogleService-Info.plist` (place in `ios/Runner/`)
+3. Set up Firebase
+   Follow the instructions in `FIREBASE_SETUP.md`
 
-4. Spotify Integration (Optional)
-   - Create a Spotify Developer account and register your app
-   - Update the `spotify_auth_service.dart` file with your credentials
-
-5. Run the app
-   ```
+4. Run the app
+   ```bash
    flutter run
    ```
 
-## Project Structure
-- `lib/main.dart` - Entry point of the application
-- `lib/screens/` - UI screens
-- `lib/services/` - Service classes for authentication, etc.
-- `lib/models/` - Data models
-- `lib/providers/` - State management
-- `lib/theme/` - App theme configuration
-- `lib/widgets/` - Reusable UI components
+## App Store Links
+- [Google Play Store](https://play.google.com/store/apps/details?id=com.hereco.tales)
+- [Apple App Store](https://apps.apple.com/app/tales-podcast-notes/id1234567890)
+
+## Tech Stack
+- Flutter
+- Firebase (Authentication, Firestore)
+- Provider for state management
+- CachedNetworkImage for efficient image loading
+- just_audio for podcast playback
+- permission_handler for device permissions
+- wallpaper_manager_plus for setting wallpapers
 
 ## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
 
 ## License
-This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
+This project is licensed under the Apache License 2.0 - see the `LICENSE` file for details.
+
+## Privacy Policy
+See `PRIVACY_POLICY.md` for information on how user data is handled.
+
+## Contact
+For support or inquiries, please contact us at support@herecotales.com
 
 ## Acknowledgments
-- Flutter team for the amazing framework
-- All the package authors used in this project
+- [Flutter Team](https://flutter.dev/)
+- All open-source libraries used in this project
+- Our beta testers and early users

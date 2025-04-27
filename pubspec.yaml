@@ -1,8 +1,8 @@
 name: tales
-description: A simple and elegant notes taking app.
+description: A beautiful app for wallpapers, podcasts, and notes.
 publish_to: 'none'
 
-version: 1.0.1+1
+version: 1.0.2+2
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -23,9 +23,24 @@ dependencies:
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   google_sign_in: ^6.2.1
-  cloud_firestore: ^4.17.5 
+  cloud_firestore: ^4.17.5
   flutter_secure_storage: ^9.2.4
   sentry_flutter: ^8.14.1
+  google_fonts: ^6.2.1
+  xml: ^6.3.0
+  intl: ^0.18.1
+  just_audio: ^0.9.36
+  audio_session: ^0.1.18
+  webview_flutter: ^4.11.0
+  # Replacing beta dependency with stable alternative
+  audio_service: ^0.18.12
+
+  # Added missing dependencies
+  cached_network_image: ^3.3.0
+  permission_handler: ^11.0.1
+  wallpaper_manager_plus: ^1.0.0
+  flutter_staggered_grid_view: ^0.7.0
+  flutter_cache_manager: ^3.3.1
 
 dev_dependencies:
   sentry_dart_plugin: ^2.4.1
@@ -33,21 +48,21 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.1
   flutter_launcher_icons: ^0.13.1
-  
+
 
 flutter:
   uses-material-design: true
   assets:
     - assets/
-    - assets/logo/tales.png
+    - assets/logo/
     - assets/icons/
     - assets/images/
-     
+
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/logo/tales.png"
- 
+
 
 sentry:
   upload_debug_symbols: true

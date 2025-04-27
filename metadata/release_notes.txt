@@ -1,0 +1,11 @@
+Version 1.0.2 (Build 2)
+
+What's New:
+• Performance optimizations for smoother scrolling and faster loading
+• Reduced app startup time
+• Fixed lag issues when browsing wallpapers
+• Improved memory management
+• Updated UI with modern fonts and icons
+• Bug fixes and stability improvements
+
+Thank you for using Tales! We're constantly working to improve your experience.

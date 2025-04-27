@@ -13,9 +13,8 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
-import 'home_screen.dart';
-import 'settings_screen.dart';
+import 'wallpaper_screen.dart';
+import 'categories_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,73 +24,74 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _tabs = [
-    const HomeScreen(),
-    const SettingsScreen(),
+  int _selectedIndex = 0; // Start with Wallpapers tab selected
+  final List<Widget> _screens = [
+    const WallpaperScreen(), // Wallpapers screen
+    const CategoriesScreen(), // Categories screen
   ];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  Widget _navItem(String label, IconData icon, int index, ThemeData theme) {
-    final isSelected = _selectedIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _onTabTapped(index),
-        child: Container(
-          decoration: isSelected
-              ? BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                        width: 3, color: theme.colorScheme.secondary),
-                  ),
-                )
-              : null,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 24,
-                color: isSelected ? theme.colorScheme.secondary : Colors.grey,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? theme.colorScheme.secondary : Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      body: _tabs[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          border: const Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
         ),
-        child: Row(
-          children: [
-            _navItem("Notes", Icons.note, 0, theme),
-            _navItem("Spotify", Icons.music_note, 1, theme),
-            _navItem("Settings", Icons.settings, 2, theme),
-          ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(26), // 0.1 * 255 = 25.5
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Theme.of(context).primaryColor,
+            unselectedItemColor: isDark ? Colors.grey[700] : Colors.grey[400],
+            selectedLabelStyle: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.normal,
+              fontSize: 11,
+            ),
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 0 ? Icons.grid_view : Icons.grid_view_outlined,
+                  size: _selectedIndex == 0 ? 28 : 24,
+                ),
+                label: 'Wallpapers',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 1 ? Icons.dashboard : Icons.dashboard_outlined,
+                  size: _selectedIndex == 1 ? 28 : 24,
+                ),
+                label: 'Categories',
+              ),
+            ],
+          ),
         ),
       ),
     );

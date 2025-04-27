@@ -2,115 +2,160 @@ import 'package:flutter/material.dart';
 import 'auth/login_screen.dart';
 import 'auth/register_screen.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Stack(
-          children: [
-            // Back button removed
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    Image.asset(
-                      'assets/logo/wobg.png',
-                      height: 64,
-                    ),
-                    const SizedBox(height: 40),
-                    const Text(
-                      'Welcome to Tales',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                                builder: (context) => const RegisterScreen()),
-                          );
-                        },
-                        child: const Text(
-                          'Register to Tales',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.white24),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                                builder: (context) => const LoginScreen()),
-                          );
-                        },
-                        child: const Text(
-                          'Login to Tales',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    Column(
-                      children: [
-                        const Text(
-                          'hereco',
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Copyright © 2025 hereco. All Rights Reserved',
-                          style: const TextStyle(
-                              color: Colors.white38, fontSize: 12),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              
+              // Logo
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF5722), // Orange-red logo color
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Transform.rotate(
+                  angle: -0.8, // Rotate slightly to match the Kite logo style
+                  child: Container(
+                    margin: const EdgeInsets.all(12),
+                    color: const Color(0xFFFF5722),
+                  ),
                 ),
               ),
+              
+              const Spacer(),
+              
+              // Welcome text
+              const Text(
+                'Welcome to',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'SpaceMono',
+                ),
+              ),
+              const Text(
+                'Tales',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'SpaceMono',
+                ),
+              ),
+              
+              const SizedBox(height: 60),
+              
+              // Open account button
+              _buildOption(
+                title: 'Open a free account',
+                icon: Icons.person_outline,
+                onTap: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => const RegisterScreen(),
+                    ),
+                  );
+                },
+              ),
+              
+              const Divider(color: Colors.grey),
+              
+              // Login button
+              _buildOption(
+                title: 'Login to Tales',
+                icon: Icons.login,
+                onTap: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                  );
+                },
+              ),
+              
+              const Divider(color: Colors.grey),
+              
+              const Spacer(),
+              
+              // Footer
+              const Center(
+                child: Text(
+                  'TALES',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    fontFamily: 'SpaceMono',
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Terms text
+              const Center(
+                child: Text(
+                  'Simple Notes App - Version 1.0.0',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                    fontFamily: 'SpaceMono',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildOption({
+    required String title, 
+    required IconData icon, 
+    required VoidCallback onTap
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Row(
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontFamily: 'SpaceMono',
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
             ),
           ],
         ),

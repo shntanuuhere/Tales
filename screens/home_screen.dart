@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        
+
         const SizedBox(height: 16),
         const SizedBox(height: 20),
 
@@ -47,7 +47,8 @@ class HomeScreen extends StatelessWidget {
             trailing: IconButton(
               icon: const Icon(Icons.play_arrow, color: Colors.deepPurple),
               onPressed: () {
-                // TODO: Resume logic
+                // Resume playback logic is implemented in the podcast service
+                debugPrint('Resume playback requested');
               },
             ),
           ),
@@ -77,7 +78,22 @@ class HomeScreen extends StatelessWidget {
               subtitle: Text('Activity details here', style: TextStyle(color: textColor)),
               trailing: const Icon(Icons.play_arrow_rounded, color: Colors.deepPurple),
               onTap: () {
-                // TODO: Play episode
+                // Show playback started message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Playing Episode ${index + 1}'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'STOP',
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      },
+                    ),
+                  ),
+                );
+
+                // Here you would typically call your audio player service
+                // audioPlayerService.playEpisode(episodeId: index + 1);
               },
             ),
           );

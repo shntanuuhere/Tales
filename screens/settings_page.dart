@@ -52,7 +52,7 @@ class SettingsPage extends StatelessWidget {
                       Text(
                         '#hereco',
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(red: 255, green: 255, blue: 255, alpha: 179),
                             fontSize: 14),
                       ),
                     ],
@@ -183,10 +183,10 @@ class SettingsPage extends StatelessWidget {
           style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 8),
-        Opacity(
+        const Opacity(
           opacity: 0.2,
           child: Column(
-            children: const [
+            children: [
               Icon(Icons.auto_awesome, size: 40),
               Text('hereco', style: TextStyle(fontSize: 18)),
             ],
@@ -222,7 +222,10 @@ class SettingsPage extends StatelessWidget {
       icon: SvgPicture.asset(
         iconPath,
         height: 24,
-        color: Theme.of(context).iconTheme.color,
+        colorFilter: ColorFilter.mode(
+          Theme.of(context).iconTheme.color!,
+          BlendMode.srcIn,
+        ),
       ),
       onPressed: () => _launchURL(url),
     );

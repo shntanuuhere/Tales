@@ -1,0 +1,75 @@
+# Privacy Policy for Tales App
+
+Effective Date: [Current Date]
+
+## Introduction
+
+Welcome to Tales! This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application Tales (the "App"). Please read this Privacy Policy carefully. By using the App, you consent to the data practices described in this statement.
+
+## Information We Collect
+
+### Personal Information
+
+We may collect personal information that you voluntarily provide to us when you:
+- Create an account
+- Use our services
+- Contact us for support
+- Participate in surveys or promotions
+
+This information may include:
+- Email address
+- Name
+- Profile picture (if provided)
+
+### Usage Information
+
+We automatically collect certain information about your device and how you use the App, including:
+- Device information (model, operating system)
+- IP address
+- App usage statistics
+- Crash reports
+
+### Firebase Analytics
+
+We use Firebase Analytics to collect anonymous usage data to help us improve the App. This data cannot be used to identify you personally.
+
+## How We Use Your Information
+
+We may use the information we collect for various purposes, including to:
+- Provide and maintain our services
+- Improve and personalize your experience
+- Communicate with you
+- Monitor usage of our services
+- Detect and prevent fraud
+
+## Data Storage and Security
+
+Your data is stored securely using Firebase services. We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
+
+## Third-Party Services
+
+Our App uses the following third-party services:
+- Firebase (Authentication, Analytics, Firestore)
+- Google Sign-In
+
+Each of these services has their own privacy policies, which we encourage you to review.
+
+## Your Choices
+
+You can:
+- Update or delete your account information
+- Opt out of marketing communications
+- Disable analytics collection through your device settings
+
+## Children's Privacy
+
+Our App is not intended for children under 13. We do not knowingly collect personal information from children under 13.
+
+## Changes to This Privacy Policy
+
+We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Effective Date" at the top.
+
+## Contact Us
+
+If you have any questions about this Privacy Policy, please contact us at:
+[Your Contact Email]

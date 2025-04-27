@@ -22,8 +22,8 @@ class GamesPage extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.deepPurple.withOpacity(0.1),
+                    ? Colors.black.withAlpha(51) // 0.2 * 255 = 51
+                    : Colors.deepPurple.withAlpha(26), // 0.1 * 255 = 26
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

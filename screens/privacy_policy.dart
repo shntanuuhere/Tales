@@ -25,27 +25,23 @@ Thank you for using Tales. Your privacy is important to us. This privacy policy 
 2. Microphone Access:
 • Tales may request access to your microphone to allow audio note-taking or recording of personal content. These recordings are stored locally or in your account and are never shared without your permission.
 
-3. Spotify Integration:
-• We may request Spotify login for accessing your public music data (e.g., playlists, listening history). This integration is optional and does not affect other app features.
-• We do not store or sell your Spotify data.
-
-4. UPI & Payments:
+3. UPI & Payments:
 • If you use any future payment features, they will comply with UPI and RBI standards. No sensitive payment information is stored on our servers.
 
-5. Wallpapers and Personalization:
+4. Wallpapers and Personalization:
 • Tales may allow users to set wallpapers for personalization. These assets are either built-in or downloaded with user consent.
 
-6. Notifications:
+5. Notifications:
 • We may send notifications to remind you to take notes or record audio. You can control notification permissions in your phone settings.
 
-7. Data Security:
+6. Data Security:
 • We use Firebase services which are GDPR and ISO/IEC 27001 compliant.
 • All communication between the app and our servers is encrypted.
 
-8. Changes to Policy:
+7. Changes to Policy:
 • We may update this privacy policy from time to time. Any changes will be reflected in the app and on our website if applicable.
 
-9. Contact Us:
+8. Contact Us:
 If you have any questions about this policy, feel free to contact us at: taleshereco@gmail.com
 
 By using Tales, you agree to this Privacy Policy.

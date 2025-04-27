@@ -12,136 +12,214 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../models/note.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_service.dart';
+
+// MockDocument to replace Firestore Document
+class MockDocument {
+  final String id;
+  final Map<String, dynamic> data;
+  
+  MockDocument({required this.id, required this.data});
+}
 
 class FirestoreService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // Get current user ID or null if not authenticated
-  String? get _userId => _auth.currentUser?.uid;
-
-  // Reference to the user's notes collection
-  CollectionReference<Map<String, dynamic>> get _notesCollection {
-    if (_userId == null) {
-      throw Exception('User must be logged in to access notes');
-    }
-    return _firestore.collection('users').doc(_userId).collection('notes');
+  // Storage key prefix
+  static const String _storageKeyPrefix = 'firestore_';
+  
+  // Auth service for user ID
+  final AuthService _authService;
+  
+  // Constructor
+  FirestoreService(this._authService);
+  
+  // Get user ID
+  String? get _userId => _authService.userId;
+  
+  // Collection key
+  String _getCollectionKey(String collection) {
+    return '$_storageKeyPrefix${_userId ?? "anonymous"}_$collection';
   }
-
-  // Check if user is authenticated
-  bool get isAuthenticated => _userId != null;
-
-  // Get all notes for the current user
-  Stream<List<Note>> getNotes() {
-    if (_userId == null) {
-      return Stream.value([]);
-    }
-
-    return _notesCollection
-        .orderBy('updatedAt', descending: true)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return Note.fromJson({
-          'id': doc.id,
-          'title': data['title'] ?? '',
-          'content': data['content'] ?? '',
-          'createdAt': data['createdAt'] ?? DateTime.now().toIso8601String(),
-          'updatedAt': data['updatedAt'] ?? DateTime.now().toIso8601String(),
-        });
-      }).toList();
-    });
+  
+  // Document key
+  String _getDocumentKey(String collection, String documentId) {
+    return '${_getCollectionKey(collection)}_$documentId';
   }
-
-  // Add a new note
-  Future<String> addNote(String title, String content) async {
-    if (_userId == null) {
-      throw Exception('User must be logged in to add notes');
-    }
-
-    final now = DateTime.now();
-    final docRef = await _notesCollection.add({
-      'title': title,
-      'content': content,
-      'createdAt': now.toIso8601String(),
-      'updatedAt': now.toIso8601String(),
-    });
-
-    return docRef.id;
-  }
-
-  // Update an existing note
-  Future<void> updateNote(String id, String title, String content) async {
-    if (_userId == null) {
-      throw Exception('User must be logged in to update notes');
-    }
-
-    await _notesCollection.doc(id).update({
-      'title': title,
-      'content': content,
-      'updatedAt': DateTime.now().toIso8601String(),
-    });
-  }
-
-  // Delete a note
-  Future<void> deleteNote(String id) async {
-    if (_userId == null) {
-      throw Exception('User must be logged in to delete notes');
-    }
-
-    await _notesCollection.doc(id).delete();
-  }
-
-  // Sync local notes to Firestore when user logs in
-  Future<void> syncLocalNotesToFirestore(List<Note> localNotes) async {
-    if (_userId == null) {
-      throw Exception('User must be logged in to sync notes');
-    }
-
-    // Get existing notes from Firestore
-    final snapshot = await _notesCollection.get();
-    final existingNoteIds = snapshot.docs.map((doc) => doc.id).toSet();
-
-    // Create a batch to handle multiple operations
-    final batch = _firestore.batch();
-
-    // Add or update each local note
-    for (final note in localNotes) {
-      final noteRef = _notesCollection.doc(note.id);
+  
+  // Add a document to a collection
+  Future<String> addDocument(String collection, Map<String, dynamic> data) async {
+    try {
+      // Generate an ID
+      final String documentId = DateTime.now().millisecondsSinceEpoch.toString();
       
-      // Convert note to Firestore format
-      final noteData = {
-        'title': note.title,
-        'content': note.content,
-        'createdAt': note.createdAt.toIso8601String(),
-        'updatedAt': note.updatedAt.toIso8601String(),
-      };
-
-      if (existingNoteIds.contains(note.id)) {
-        // Update existing note
-        batch.update(noteRef, noteData);
-      } else {
-        // Create new note
-        batch.set(noteRef, noteData);
-      }
+      // Add timestamp
+      data['createdAt'] = DateTime.now().toIso8601String();
+      data['updatedAt'] = DateTime.now().toIso8601String();
+      
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _getDocumentKey(collection, documentId),
+        jsonEncode(data),
+      );
+      
+      // Update collection index
+      await _updateCollectionIndex(collection, documentId, true);
+      
+      return documentId;
+    } catch (e) {
+      debugPrint('Error adding document: $e');
+      rethrow;
     }
-
-    // Commit the batch
-    await batch.commit();
   }
-
-  // Save user details to Firestore
-  // When retrieving user details from Firestore, always use Map<String, dynamic> for parsing.
-  // Do not cast Firestore documents directly to custom types or List<Object?>; use explicit deserialization.
-  Future<void> saveUserDetails(String uid, String username, String email) async {
-    await _firestore.collection('users').doc(uid).set({
-      'username': username,
-      'email': email,
-      'createdAt': DateTime.now().toIso8601String(),
-    }, SetOptions(merge: true));
+  
+  // Get a document by ID
+  Future<MockDocument?> getDocument(String collection, String documentId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonData = prefs.getString(_getDocumentKey(collection, documentId));
+      
+      if (jsonData == null) {
+        return null;
+      }
+      
+      return MockDocument(
+        id: documentId,
+        data: jsonDecode(jsonData) as Map<String, dynamic>,
+      );
+    } catch (e) {
+      debugPrint('Error getting document: $e');
+      return null;
+    }
+  }
+  
+  // Update a document
+  Future<void> updateDocument(String collection, String documentId, Map<String, dynamic> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonData = prefs.getString(_getDocumentKey(collection, documentId));
+      
+      if (jsonData == null) {
+        throw 'Document not found';
+      }
+      
+      // Get existing data
+      final Map<String, dynamic> existingData = jsonDecode(jsonData) as Map<String, dynamic>;
+      
+      // Merge data
+      existingData.addAll(data);
+      
+      // Update timestamp
+      existingData['updatedAt'] = DateTime.now().toIso8601String();
+      
+      // Save to SharedPreferences
+      await prefs.setString(
+        _getDocumentKey(collection, documentId),
+        jsonEncode(existingData),
+      );
+    } catch (e) {
+      debugPrint('Error updating document: $e');
+      rethrow;
+    }
+  }
+  
+  // Delete a document
+  Future<void> deleteDocument(String collection, String documentId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_getDocumentKey(collection, documentId));
+      
+      // Update collection index
+      await _updateCollectionIndex(collection, documentId, false);
+    } catch (e) {
+      debugPrint('Error deleting document: $e');
+      rethrow;
+    }
+  }
+  
+  // Get all documents in a collection
+  Future<List<MockDocument>> getCollection(String collection) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> documentIds = await _getCollectionIndex(collection);
+      
+      final List<MockDocument> documents = [];
+      
+      for (final documentId in documentIds) {
+        final String? jsonData = prefs.getString(_getDocumentKey(collection, documentId));
+        
+        if (jsonData != null) {
+          documents.add(MockDocument(
+            id: documentId,
+            data: jsonDecode(jsonData) as Map<String, dynamic>,
+          ));
+        }
+      }
+      
+      return documents;
+    } catch (e) {
+      debugPrint('Error getting collection: $e');
+      return [];
+    }
+  }
+  
+  // Update collection index
+  Future<void> _updateCollectionIndex(String collection, String documentId, bool add) async {
+    try {
+      final List<String> documentIds = await _getCollectionIndex(collection);
+      
+      if (add) {
+        // Add if not exists
+        if (!documentIds.contains(documentId)) {
+          documentIds.add(documentId);
+        }
+      } else {
+        // Remove if exists
+        documentIds.remove(documentId);
+      }
+      
+      // Save updated index
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_getCollectionKey(collection), documentIds);
+    } catch (e) {
+      debugPrint('Error updating collection index: $e');
+    }
+  }
+  
+  // Get collection index (list of document IDs)
+  Future<List<String>> _getCollectionIndex(String collection) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getStringList(_getCollectionKey(collection)) ?? [];
+    } catch (e) {
+      debugPrint('Error getting collection index: $e');
+      return [];
+    }
+  }
+  
+  // Stream a collection (simulated)
+  Stream<List<MockDocument>> streamCollection(String collection) {
+    // Use a StreamController to simulate Firestore streams
+    final StreamController<List<MockDocument>> controller = StreamController<List<MockDocument>>.broadcast();
+    
+    // Initial data
+    _loadInitialData(collection, controller);
+    
+    // Return the stream
+    return controller.stream;
+  }
+  
+  // Load initial data for stream
+  Future<void> _loadInitialData(String collection, StreamController<List<MockDocument>> controller) async {
+    try {
+      final documents = await getCollection(collection);
+      controller.add(documents);
+    } catch (e) {
+      debugPrint('Error loading initial data: $e');
+      controller.add([]);
+    }
   }
 }

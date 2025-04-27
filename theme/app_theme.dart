@@ -15,8 +15,7 @@ class AppTheme {
     primaryColor: primaryOrange,
     colorScheme: const ColorScheme.dark().copyWith(
       primary: primaryOrange,
-      background: pitchBlack,
-      surface: darkGrey,
+      surface: pitchBlack,
       secondary: accentOrange,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(

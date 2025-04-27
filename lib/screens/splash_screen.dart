@@ -12,122 +12,94 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:tales/services/auth_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../theme/app_theme.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_controller);
-
-    _controller.repeat();
-
-    Timer(const Duration(seconds: 3), () async {
-      if (!mounted) return;
-      final prefs = await SharedPreferences.getInstance();
-      final user = await FirebaseAuth.instance.authStateChanges().first;
-      final bool? seenWelcome = prefs.getBool('seen_welcome');
-      if (user == null) {
-        // First time user
-        if (seenWelcome != true) {
-          Navigator.pushReplacementNamed(context, '/welcome');
-        } else {
-          Navigator.pushReplacementNamed(context, '/login');
-        }
-      } else {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(flex: 2),
-            FadeTransition(
-              opacity: _animation,
-              child: ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [Colors.orange.shade400, Colors.deepOrange.shade700],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(bounds),
-                child: const Text(
-                  'Tales',
-                  style: TextStyle(
-                    fontSize: 72,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                  ),
+            // Status bar spacer
+            const SizedBox(height: 20),
+
+            // Main content centered
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo triangular shape - lightweight version
+                    SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: CustomPaint(
+                        painter: TrianglePainter(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 50),
+
+                    // Simple progress indicator
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 100),
+                      child: LinearProgressIndicator(
+                        backgroundColor: Color(0xFF333333),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                        minHeight: 3,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            SizedBox(
-              width: 240,
-              child: AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return LinearProgressIndicator(
-                    value: _animation.value,
-                    backgroundColor: Colors.orange.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.orange.shade600),
-                    minHeight: 4,
-                    borderRadius: BorderRadius.circular(2),
-                  );
-                },
+
+            // Bottom text with proper spacing
+            Padding(
+              padding: const EdgeInsets.only(bottom: 34),
+              child: Text(
+                'TALES',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
             ),
-            const Spacer(),
-            Text(
-              'hereco',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.orange.shade400,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
+}
+
+// Custom painter for triangular logo - optimized version
+class TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Use a single paint object for better performance
+    final paint = Paint()
+      ..color = AppTheme.splashLogoColor
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true; // Improve rendering quality
+
+    // Create a simple triangle path
+    final path = Path();
+    path.moveTo(0, 0);
+    path.lineTo(size.width, size.width / 2);
+    path.lineTo(0, size.height);
+    path.close();
+
+    // Draw only one path for better performance
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

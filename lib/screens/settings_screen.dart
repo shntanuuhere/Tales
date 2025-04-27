@@ -12,164 +12,83 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/theme_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  Widget _buildSettingItem({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    Color? iconColor,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: iconColor ?? Theme.of(context).colorScheme.primary,
-      ),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final themeService = Provider.of<ThemeService>(context);
+
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text('Settings'),
-        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
       ),
       body: ListView(
         children: [
-          // Profile Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: const Icon(Icons.person, size: 32, color: Colors.white),
-                ),
-                const SizedBox(width: 16),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Guest User',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text('guest@example.com'),
-                  ],
-                ),
-              ],
-            ),
+          // Appearance Section
+          _buildSectionHeader(context, 'Appearance'),
+          SwitchListTile(
+            title: const Text('Dark Mode'),
+            subtitle: const Text('Enable dark theme'),
+            value: themeService.isDarkMode,
+            onChanged: (value) {
+              themeService.toggleTheme();
+            },
           ),
           const Divider(),
 
-          // Account Settings
-          _buildSettingItem(
-            context: context,
-            icon: Icons.account_circle,
-            title: 'Account',
-            subtitle: 'Login details, delete account',
-            onTap: () {},
+          // Legal Section
+          _buildSectionHeader(context, 'Legal'),
+                  ListTile(
+            title: const Text('Privacy Policy'),
+            leading: const Icon(Icons.privacy_tip),
+            onTap: () {
+              // Would navigate to privacy policy
+                        ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Privacy Policy would open here')),
+                        );
+                    },
+                  ),
+                  ListTile(
+            title: const Text('Terms of Service'),
+            leading: const Icon(Icons.description),
+            onTap: () {
+              // Would navigate to terms of service
+                        ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Terms of Service would open here')),
+              );
+            },
           ),
-
-          // Privacy Settings
-          _buildSettingItem(
-            context: context,
-            icon: Icons.lock,
-            title: 'Privacy',
-            subtitle: 'Biometric authentication',
-            onTap: () {},
-          ),
-
-          // Avatar Settings
-          _buildSettingItem(
-            context: context,
-            icon: Icons.face,
-            title: 'Avatar',
-            subtitle: 'Edit profile name/photo',
-            onTap: () {},
-          ),
-
-          // Theme Settings
-          _buildSettingItem(
-            context: context,
-            icon: Icons.palette,
-            title: 'Themes',
-            subtitle: 'Dark or light mode',
-            onTap: () {},
-          ),
-
-          // Notification Settings
-          _buildSettingItem(
-            context: context,
-            icon: Icons.notifications,
-            title: 'Notifications',
-            subtitle: 'Push notification preferences',
-            onTap: () {},
-          ),
-
           const Divider(),
 
-          // Help & Legal
-          _buildSettingItem(
-            context: context,
-            icon: Icons.help,
-            title: 'Help',
-            subtitle: 'Privacy policy, terms, about us',
-            onTap: () {},
-          ),
-
-          // App Version
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                Image.asset(
-                  'assets/images/logo.png',
-                  height: 48,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Tales v1.0.0',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.facebook),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.link),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.email),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          // About Section
+          _buildSectionHeader(context, 'About'),
+                  const ListTile(
+                    title: Text('App Version'),
+                    subtitle: Text('1.0.0'),
+            leading: Icon(Icons.info),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            title,
+            style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
       ),
     );
   }

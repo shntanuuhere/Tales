@@ -12,243 +12,407 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/notes_provider.dart';
-import '../models/note.dart';
-import 'note_editor_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'settings_screen.dart';
+import 'wallpaper_detail_screen.dart';
+import '../services/wallpaper_service.dart';
+import '../models/wallpaper.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Load wallpapers if needed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final wallpaperService = Provider.of<WallpaperService>(context, listen: false);
+      if (wallpaperService.wallpapers.isEmpty) {
+        wallpaperService.fetchWallpapers();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final wallpaperService = Provider.of<WallpaperService>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'TALES.',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: false,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // App Bar with Search and User Profile
+          SliverAppBar(
+            backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
+            elevation: 0,
+            floating: true,
+            pinned: false,
+            title: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: isDark ? const Color(0xFF1E1E1E) : Colors.grey[200],
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search wallpapers...',
+                  hintStyle: TextStyle(
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              ),
+            ),
+            actions: [
+              // User profile icon
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E1E1E) : Colors.grey[200],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    color: isDark ? Colors.white : Colors.black,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Welcome/Greeting
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'TALES.',
+                  Text(
+                    'Discover',
                     style: TextStyle(
-                      fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search for notes',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Theme.of(context).cardColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip('All', true),
-                        _buildFilterChip('Important', false),
-                        _buildFilterChip('Lecture notes', false),
-                        _buildFilterChip('To-do lists', false),
-                        _buildFilterChip('Shopping', false),
-                      ],
+                  Text(
+                    'Find the perfect wallpaper for your screen',
+                    style: TextStyle(
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
-            Expanded(
-              child: Consumer<NotesProvider>(
-                builder: (context, notesProvider, child) {
-                  final notes = notesProvider.notes;
-                  
-                  if (notes.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.note_add,
-                            size: 64,
-                            color: Theme.of(context).disabledColor,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No notes yet',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Tap + to create your first note',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+          ).animate().fade(duration: 400.ms).slideY(begin: 0.2, end: 0),
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.85,
+          // New and trending section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'New & Trending',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
-                    itemCount: notes.length,
-                    itemBuilder: (context, index) {
-                      final note = notes[index];
-                      return _buildNoteCard(context, note);
-                    },
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E1E1E) : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'See All',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ).animate().fade(duration: 400.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
+
+          // Loading state
+          if (wallpaperService.isLoading)
+            const SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+
+          // Wallpaper grid (using staggered grid for more visual interest)
+          if (!wallpaperService.isLoading)
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverMasonryGrid.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childCount: wallpaperService.wallpapers.length,
+                itemBuilder: (context, index) {
+                  final wallpaper = wallpaperService.wallpapers[index];
+                  return _buildWallpaperCard(
+                    context,
+                    wallpaper,
+                    index,
+                    isDark,
+                    wallpaperService
                   );
                 },
               ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NoteEditorScreen(),
+
+          // Empty state
+          if (!wallpaperService.isLoading && wallpaperService.wallpapers.isEmpty)
+            SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.image_not_supported,
+                        size: 80,
+                        color: isDark ? Colors.grey[700] : Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No wallpapers found',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _searchQuery.isNotEmpty
+                            ? 'Try a different search term'
+                            : 'Check your internet connection',
+                        style: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.music_note),
-            label: 'Spotify',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+
+          // Bottom padding for navigation bar
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 80),
           ),
         ],
-        selectedIndex: 0,
-        onDestinationSelected: (int index) {
-          if (index == 2) { // Settings tab
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ),
-            );
-          }
-        },
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, bool selected) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: FilterChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (bool selected) {},
-      ),
-    );
-  }
+  Widget _buildWallpaperCard(
+    BuildContext context,
+    Wallpaper wallpaper,
+    int index,
+    bool isDark,
+    WallpaperService wallpaperService
+  ) {
+    // Calculate a random height between 180 and 280
+    final double height = 200.0 + (index % 3) * 30;
 
-  Widget _buildNoteCard(BuildContext context, Note note) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => NoteEditorScreen(note: note),
+            builder: (context) => WallpaperDetailScreen(wallpaper: wallpaper),
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              note.title.isEmpty ? 'Untitled' : note.title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+      child: Hero(
+        tag: 'wallpaper_image_${wallpaper.id}',
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(26), // 0.1 * 255 = 26
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Wallpaper image with CachedNetworkImage for better performance
+                CachedNetworkImage(
+                  imageUrl: wallpaper.thumbnailUrl,
+                  fit: BoxFit.cover,
+                  memCacheWidth: 400, // Limit memory cache size
+                  memCacheHeight: 600,
+                  fadeInDuration: const Duration(milliseconds: 200),
+                  placeholder: (context, url) => Container(
+                    color: isDark ? Colors.grey[800] : Colors.grey[300],
+                    child: const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: isDark ? Colors.grey[800] : Colors.grey[300],
+                    child: const Icon(Icons.broken_image, size: 40),
+                  ),
+                ),
+
+                // Bottom gradient and info
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withAlpha(179), // 0.7 * 255 = 179
+                        ],
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            wallpaper.photographer,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            wallpaperService.toggleFavorite(wallpaper);
+                          },
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(77), // 0.3 * 255 = 77
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              wallpaperService.isFavorite(wallpaper.id)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: wallpaperService.isFavorite(wallpaper.id)
+                                  ? Colors.red
+                                  : Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // "New" tag for first few items
+                if (index < 3)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'NEW',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Text(
-                note.content,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: 6,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _formatTimestamp(note.updatedAt),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+          ),
         ),
       ),
-    );
-  }
-
-  String _formatTimestamp(DateTime timestamp) {
-    return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+    ).animate(delay: Duration(milliseconds: 50 * (index % 5)))
+      .fadeIn(duration: 300.ms)
+      .slideY(begin: 0.1, end: 0);
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'settings_page.dart';
 import 'games_page.dart';
@@ -48,7 +47,10 @@ class _HomePageState extends State<HomePage> {
                 assetName,
                 width: 24,
                 height: 24,
-                color: isSelected ? theme.colorScheme.secondary : Colors.grey,
+                colorFilter: ColorFilter.mode(
+                  isSelected ? theme.colorScheme.secondary : Colors.grey,
+                  BlendMode.srcIn
+                ),
               ),
               const SizedBox(height: 4),
               Text(
