@@ -4,6 +4,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("org.sonarqube") version "6.0.1.5171"
 }
 
 import org.gradle.api.JavaVersion
@@ -116,6 +117,14 @@ dependencies {
     // Add explicit androidx.core dependency to help with plugin compatibility
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "shntanuuhere_Tales")
+    property("sonar.organization", "shntanuuhere")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
 }
 
 flutter {

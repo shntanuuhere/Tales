@@ -1,37 +1,36 @@
-name: Build
-
+name: SonarQube
 on:
   push:
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
-
 jobs:
-  sonarqube:
-    name: SonarQube
-    runs-on: windows-latest
-
+  build:
+    name: Build and analyze
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          flutter-version: '3.13.0'  # Replace with your actual Flutter version
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze and Build
-        run: |
-          flutter analyze
-          flutter build apk --debug  # or 'build web' / 'build ios' depending on your target
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+          java-version: 17
+          distribution: 'zulu' # Alternative distribution options are available
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # Add this if using a self-hosted SonarQube server
+        run: ./gradlew build sonar --info
