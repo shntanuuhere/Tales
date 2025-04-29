@@ -9,6 +9,9 @@ jobs:
   sonarqube:
     name: SonarQube
     runs-on: windows-latest
+    env:
+      FLUTTER_CI: true
+      CI: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -17,8 +20,12 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
+          flutter-version: '3.19.3'
           channel: 'stable'
+
+      # Accept Flutter analytics
+      - name: Accept Flutter analytics
+        run: flutter config --no-analytics
 
       # Get Flutter dependencies
       - name: Get dependencies
@@ -27,8 +34,8 @@ jobs:
       # Run Flutter tests with coverage
       - name: Run tests with coverage
         run: flutter test --coverage
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
