@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    
+    <!-- This is a simple placeholder that references the app icon -->
+    <!-- In a real implementation, you would use a proper image asset -->
+    <group
+        android:pivotX="60"
+        android:pivotY="60"
+        android:scaleX="1.0"
+        android:scaleY="1.0">
+        <path
+            android:fillColor="#3F51B5"
+            android:pathData="M60,10L110,110L10,110z" />
+    </group>
+</vector>

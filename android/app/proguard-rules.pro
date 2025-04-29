@@ -81,3 +81,9 @@
 # Keep Google Play Core
 -keep class com.google.android.play.** { *; }
 -dontwarn com.google.android.play.**
+
+# Wallpaper plugins
+-keep class com.example.imagegallerysaver.** { *; }
+-keep class com.mulgundkar.wallpaper_manager_plus.** { *; }
+-dontwarn com.example.imagegallerysaver.**
+-dontwarn com.mulgundkar.wallpaper_manager_plus.**

@@ -1,6 +1,6 @@
-# Tales - Wallpapers, Podcasts & Notes App
+# Tales - A Beautiful Wallpaper App
 
-Tales is a modern, elegantly designed app that combines beautiful wallpapers, podcast listening, and note-taking functionality. It provides a seamless experience for users who want to personalize their devices, enjoy their favorite podcasts, and keep track of important information.
+Tales is a modern, lightweight, and elegantly designed wallpaper app built with Flutter using clean architecture principles. It provides a seamless experience for users who want to personalize their devices with high-quality wallpapers.
 
 <p align="center">
   <img src="assets/logo/tales.png" width="120" alt="Tales Logo">
@@ -9,26 +9,12 @@ Tales is a modern, elegantly designed app that combines beautiful wallpapers, po
 ## Features
 
 ### Wallpapers
-- Browse high-quality wallpapers
+- Browse high-quality wallpapers from Unsplash API
 - Set as home screen or lock screen
 - Download for offline use
 - Save favorites
 - Browse by categories
 - Like wallpapers you enjoy
-
-### Podcast Player
-- Stream podcasts from RSS feeds
-- Background playback support
-- Playback speed control (0.75x, 1.0x, 1.5x, 2.0x)
-- Skip forward/backward
-- Episode progress tracking
-- Mini-player for continuous listening while browsing
-
-### Notes
-- Create, edit, and organize personal notes
-- Rich text formatting
-- Color-coded categories
-- Search functionality
 
 ### User Experience
 - Beautiful, minimalist design
@@ -39,8 +25,32 @@ Tales is a modern, elegantly designed app that combines beautiful wallpapers, po
 
 ### Security
 - Firebase Authentication
-- Optional biometric authentication
 - Secure cloud data storage
+
+## Architecture
+
+The app follows clean architecture principles with a feature-based approach:
+
+```
+lib/
+  ├── core/                   # Core utilities and common functionality
+  │   ├── constants/          # App constants
+  │   ├── errors/             # Error handling
+  │   ├── network/            # Network utilities
+  │   └── utils/              # General utilities
+  ├── features/               # Feature modules
+  │   ├── wallpapers/         # Wallpaper feature
+  │   ├── categories/         # Categories feature
+  │   ├── auth/               # Authentication feature
+  │   └── settings/           # Settings feature
+  ├── data/                   # Data layer
+  ├── domain/                 # Domain layer
+  ├── presentation/           # Presentation layer
+  ├── di/                     # Dependency injection
+  └── main.dart               # Entry point
+```
+
+For more details on the architecture, see [CODEBASE_STRUCTURE.md](CODEBASE_STRUCTURE.md).
 
 ## Getting Started
 
@@ -76,10 +86,12 @@ Tales is a modern, elegantly designed app that combines beautiful wallpapers, po
 - Flutter
 - Firebase (Authentication, Firestore)
 - Provider for state management
+- Get_it for dependency injection
+- Clean Architecture principles
 - CachedNetworkImage for efficient image loading
-- just_audio for podcast playback
 - permission_handler for device permissions
 - wallpaper_manager_plus for setting wallpapers
+- connectivity_plus for network monitoring
 
 ## Contributing
 Contributions are welcome! Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.

@@ -6,6 +6,10 @@ Thank you for considering contributing to Tales! This document provides guidelin
 
 By participating in this project, you agree to maintain a respectful and inclusive environment for everyone.
 
+## Codebase Structure
+
+Please familiarize yourself with our [codebase structure](CODEBASE_STRUCTURE.md) before contributing. The project follows clean architecture principles with a feature-based approach.
+
 ## How Can I Contribute?
 
 ### Reporting Bugs
@@ -56,6 +60,15 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - Follow the [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
 - Run `flutter analyze` before submitting to ensure your code has no issues
 - Use meaningful variable and function names
+
+### Architecture Guidelines
+
+- Follow clean architecture principles
+- Organize code by feature, not by layer
+- Use dependency injection for all dependencies
+- Write tests for all layers
+- Document your code with comments and README files
+- Keep the UI layer separate from business logic
 
 ## Additional Notes
 

@@ -22,7 +22,6 @@
 
     <!-- Required for legacy storage access -->
     <application
-        android:name=".TalesApplication"
         android:label="Tales"
         android:icon="@mipmap/ic_launcher"
         tools:replace="android:label"

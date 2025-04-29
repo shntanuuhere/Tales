@@ -42,37 +42,52 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 
+	<!-- Permission for saving wallpapers to photo library -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Tales needs access to your photo library to save wallpapers</string>
+
+	<!-- Permission for adding photos without full library access -->
+	<key>NSPhotoLibraryAddOnlyUsageDescription</key>
+	<string>Tales needs permission to save wallpapers to your photo library</string>
+
 	<!-- Permission for biometric authentication -->
 	<key>NSFaceIDUsageDescription</key>
-	<string>We need to use Face ID to securely authenticate you to access your notes</string>
+	<string>We need to use Face ID to securely authenticate you</string>
 
-	<!-- Permission for background audio playback -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-		<string>processing</string>
-		<string>remote-notification</string>
-	</array>
-
-	<!-- Permission for network usage -->
+	<!-- Permission for network usage - more secure configuration -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>api.unsplash.com</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>images.unsplash.com</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
 	</dict>
 
 	<!-- Permission for local storage -->
 	<key>NSDocumentsDirectory</key>
-	<string>Used to store downloaded podcasts and user notes</string>
+	<string>Used to store downloaded wallpapers and user preferences</string>
 
-	<!-- Media playback control -->
+	<!-- Debug services -->
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_dartobservatory._tcp</string>
 	</array>
 
-	<!-- Notification permissions -->
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow microphone access for voice notes and search functionality</string>
+	<!-- Required for iOS 14+ -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
