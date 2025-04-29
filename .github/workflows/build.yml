@@ -25,21 +25,46 @@ jobs:
 
       # Accept Flutter analytics
       - name: Accept Flutter analytics
-        env:
-          FLUTTER_SKIP_ANDROID_EMBEDDING_V2_CHECK: true
-        run: flutter config --no-analytics
+        run: flutter config --no-analytics --no-android-embedding-v2-check
+
+      # Create dummy google-services.json file
+      - name: Create dummy google-services.json
+        run: |
+          mkdir -p android/app
+          echo '{
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "dummy-project",
+              "storage_bucket": "dummy-project.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": {
+                    "package_name": "com.hereco.tales"
+                  }
+                },
+                "api_key": [
+                  {
+                    "current_key": "dummy_api_key"
+                  }
+                ]
+              }
+            ]
+          }' > android/app/google-services.json
+
+      # Downgrade google_fonts to compatible version
+      - name: Downgrade google_fonts
+        run: flutter pub add google_fonts:^6.2.0 --no-android-embedding-v2-check
 
       # Get Flutter dependencies
       - name: Get dependencies
-        env:
-          FLUTTER_SKIP_ANDROID_EMBEDDING_V2_CHECK: true
-        run: flutter pub get
+        run: flutter pub get --no-android-embedding-v2-check
 
       # Run Flutter tests with coverage
       - name: Run tests with coverage
-        env:
-          FLUTTER_SKIP_ANDROID_EMBEDDING_V2_CHECK: true
-        run: flutter test --coverage
+        run: flutter test --coverage --no-android-embedding-v2-check
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
